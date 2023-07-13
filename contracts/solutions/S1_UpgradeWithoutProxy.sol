@@ -2,7 +2,7 @@
 
 // https://mixbytes.io/blog/pitfalls-of-using-cteate-cteate2-and-extcodesize-opcodes
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "hardhat/console.sol";

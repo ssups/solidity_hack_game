@@ -2,6 +2,17 @@ import { ethers } from "hardhat";
 import { P1_UpgradeWithoutProxyV1__factory } from "../../typechain-types";
 
 async function main() {
+  const test1 = ethers.utils
+    .keccak256(ethers.utils.toUtf8Bytes("transfer(address,uint)"))
+    .slice(2, 2 + 8);
+  const test2 = ethers.utils
+    .keccak256(ethers.utils.toUtf8Bytes("transfer(address,uint256)"))
+    .slice(2, 2 + 8);
+
+  console.log(test1);
+  console.log(test2);
+
+  return;
   const provider = ethers.provider;
   const [owner, user1, user2, user3] = await ethers.getSigners();
   const users = [user1, user2, user3];
