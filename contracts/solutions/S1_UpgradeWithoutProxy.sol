@@ -69,13 +69,27 @@ contract Factory2 {
         selfdestruct(payable(parent));
     }
 
-    function deploy(bytes memory bytecode) external onlyParent returns(address) {
+    // function deploy(bytes memory bytecode) external onlyParent returns(address) {
+    //     address addr;
+    //     assembly {
+    //         addr := create(
+    //             0, // amount to sent to new contract
+    //             add(bytecode, 0x20), // ost
+    //             mload(bytecode) // len
+    //         )
+    //     }
+    //     deployedContract = addr;
+    //     return addr;
+    // }
+    function deploy(bytes calldata bytecode) external onlyParent returns(address) {
         address addr;
         assembly {
+            let ptr := mload(0x40)
+            calldatacopy(ptr, 68, bytecode.length) // 68 -> 4(selector) + 32(offset) + 32(length)
             addr := create(
                 0, // amount to sent to new contract
-                add(bytecode, 0x20), // ost
-                mload(bytecode) // len
+                ptr, // ost
+                bytecode.length // len
             )
         }
         deployedContract = addr;
@@ -101,7 +115,7 @@ contract Factory1 {
         S1_UpgradeWithoutProxyV1(deployedFactory2Ca).destroy();
     }
 
-    function deploy(uint salt, bytes memory bytecode) external onlyOwner {
+    function deploy(uint salt, bytes calldata bytecode) external onlyOwner {
         // using create2
         Factory2 factory2 = new Factory2{salt: bytes32(salt)}();
         deployedFactory2Ca = address(factory2);

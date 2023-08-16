@@ -2,17 +2,6 @@ import { ethers } from "hardhat";
 import { P1_UpgradeWithoutProxyV1__factory } from "../../typechain-types";
 
 async function main() {
-  const test1 = ethers.utils
-    .keccak256(ethers.utils.toUtf8Bytes("transfer(address,uint)"))
-    .slice(2, 2 + 8);
-  const test2 = ethers.utils
-    .keccak256(ethers.utils.toUtf8Bytes("transfer(address,uint256)"))
-    .slice(2, 2 + 8);
-
-  console.log(test1);
-  console.log(test2);
-
-  return;
   const provider = ethers.provider;
   const [owner, user1, user2, user3] = await ethers.getSigners();
   const users = [user1, user2, user3];
@@ -33,6 +22,7 @@ async function main() {
   const bytecode = (await ethers.getContractFactory("S1_UpgradeWithoutProxyV1")).bytecode;
   const tx = await factory1.deploy(salt, bytecode);
   const receipt = await tx.wait();
+  console.log("@@@@@@@@@@@@@@", receipt.gasUsed);
   const logData = receipt.logs[0].data.slice(2);
   const contractV1Ca = "0x" + logData.slice(24, 64);
   const factory2Ca = "0x" + logData.slice(64 + 24);
@@ -49,7 +39,7 @@ async function main() {
   // users depoist token to contract
   {
     let promises = users.map(async (user) => {
-      const balance = await tokenC.balanceOf(user.address);
+      const balance = await tokenC.balanceOf(await user.getAddress());
       const approveTx = await tokenC.connect(user).approve(contractV1Ca, balance);
       await approveTx.wait();
       const depositTx = await contractV1.connect(user).deposit(tokenC.address, balance);
@@ -60,7 +50,7 @@ async function main() {
     const user_balance: { [key: string]: string } = {};
     promises = users.map(async (user, ind) => {
       user_balance[`user${ind + 1}`] = ethers.utils.formatEther(
-        await contractV1.balanceOf(tokenC.address, user.address)
+        await contractV1.balanceOf(tokenC.address, await user.getAddress())
       );
     });
     await Promise.all(promises);
